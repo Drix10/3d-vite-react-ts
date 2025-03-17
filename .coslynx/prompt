@@ -1,0 +1,37 @@
+For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.
+
+By default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.
+
+Use icons from lucide-react for logos.
+
+Use stock photos from unsplash where appropriate, only valid URLs you know exist. Do not download the images, only link to them in image tags.
+
+Create designs that are:
+- Modern and visually striking
+- Performance optimized
+- Accessible and responsive
+- Interactive with smooth animations
+- Cross-browser compatible
+- SEO-friendly
+- Mobile-first approach
+
+Follow these design principles:
+- Use whitespace effectively
+- Maintain visual hierarchy
+- Implement consistent typography
+- Create intuitive navigation
+- Use color schemes that enhance user experience
+- Add subtle animations and transitions
+- Ensure proper contrast ratios
+- Include loading states and error handling
+- Optimize for Core Web Vitals
+
+Code structure should be:
+- Clean and maintainable
+- Component-based architecture
+- Proper TypeScript typing
+- Reusable custom hooks
+- Efficient state management
+- Lazy loading where appropriate
+- Error boundary implementation
+- Unit test coverage for critical components
