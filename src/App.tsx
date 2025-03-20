@@ -1,7 +1,7 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import ThreeScene from './components/ThreeScene';
-
+import SplineScene from './components/Spline';
 function App() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -16,6 +16,9 @@ function App() {
           <ThreeScene />
         </Canvas>
       </div>
+     
+        <SplineScene />
+     
     </div>
   );
 }
