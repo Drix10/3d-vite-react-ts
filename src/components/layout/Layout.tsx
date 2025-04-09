@@ -10,8 +10,8 @@ interface LayoutProps {
 
 export default function Layout({
     children,
-    title = '3D Landing Page',
-    description = 'A modern 3D landing page template built with React, Three.js, and TailwindCSS'
+    title = 'React TypeScript Template',
+    description = 'A lightweight React TypeScript template'
 }: LayoutProps) {
     useEffect(() => {
         document.title = title;
@@ -23,9 +23,9 @@ export default function Layout({
     }, [title, description]);
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="layout">
             <Header title={title} />
-            <main className="flex-grow">
+            <main className="layout-main">
                 {children}
             </main>
             <Footer />

@@ -1,88 +1,102 @@
-import Section from '../ui/Section';
-import Button from '../ui/Button';
-import useScrollAnimation from '../../hooks/useScrollAnimation';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import Section from './Section';
+import ThreeScene from '../3d/ThreeScene';
 
 export default function ContactSection() {
-    const [formRef, isFormVisible] = useScrollAnimation<HTMLFormElement>({
-        threshold: 0.2,
+    const [formState, setFormState] = useState({
+        name: '',
+        email: '',
+        message: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormState(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setTimeout(() => {
+            setIsSubmitting(false);
+            setIsSubmitted(true);
+            setFormState({ name: '', email: '', message: '' });
+            setTimeout(() => setIsSubmitted(false), 5000);
+        }, 1500);
+    };
 
     return (
-        <Section id="contact" bgColor="bg-white">
-            <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Get In Touch</h2>
-                    <p className="text-xl text-gray-600">
-                        Have questions about our 3D web experiences? Send us a message!
-                    </p>
+        <Section id="contact" title="Get In Touch">
+            <div className="contact-container">
+                <div className="contact-form-wrapper">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        {isSubmitted ? (
+                            <div className="form-success">
+                                <h3>Thanks for reaching out!</h3>
+                                <p>We've received your message and will get back to you soon.</p>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="contact-form">
+                                <div className="form-group">
+                                    <label htmlFor="name">Name</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        value={formState.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="email">Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formState.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="message">Message</label>
+                                    <textarea
+                                        id="message"
+                                        name="message"
+                                        value={formState.message}
+                                        onChange={handleChange}
+                                        rows={5}
+                                        required
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="submit-button"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                                </button>
+                            </form>
+                        )}
+                    </motion.div>
                 </div>
 
-                <form
-                    ref={formRef}
-                    className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-700 ${isFormVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                        }`}
-                    onSubmit={(e) => e.preventDefault()}
-                >
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                Name
-                            </label>
-                            <input
-                                type="text"
-                                id="name"
-                                name="name"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Your name"
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="your.email@example.com"
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                                Phone (optional)
-                            </label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                name="phone"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="(123) 456-7890"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                                Message
-                            </label>
-                            <textarea
-                                id="message"
-                                name="message"
-                                rows={6}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Your message..."
-                            ></textarea>
-                        </div>
-                        <div className="pt-4">
-                            <Button type="submit" size="lg" className="w-full">
-                                Send Message
-                            </Button>
-                        </div>
-                    </div>
-                </form>
+                <div className="contact-3d">
+                    <ThreeScene backgroundColor="#0F172A" />
+                </div>
             </div>
         </Section>
     );
-}
+} 

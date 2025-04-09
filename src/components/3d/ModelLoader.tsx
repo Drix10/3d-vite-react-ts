@@ -1,97 +1,115 @@
-import { useRef, Suspense, useEffect } from 'react';
-import { useGLTF, OrbitControls, Environment, PresentationControls } from '@react-three/drei';
-import { GroupProps } from '@react-three/fiber';
-import { Group } from 'three';
+import { useRef, useEffect, useState } from 'react';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-interface ModelLoaderProps extends GroupProps {
+interface ModelLoaderProps {
     modelPath: string;
     scale?: number;
-    position?: [number, number, number];
-    rotation?: [number, number, number];
-    enableOrbitControls?: boolean;
-    enablePresentationControls?: boolean;
-    environmentPreset?: 'sunset' | 'dawn' | 'night' | 'warehouse' | 'forest' | 'apartment' | 'studio' | 'city' | 'park' | 'lobby';
-    onLoadingComplete?: () => void;
-}
-
-function Model({ modelPath, scale = 1, position = [0, 0, 0], rotation = [0, 0, 0], ...props }: ModelLoaderProps) {
-    const { scene } = useGLTF(modelPath);
-    const groupRef = useRef<Group>(null);
-
-    return (
-        <group ref={groupRef} {...props}>
-            <primitive
-                object={scene}
-                scale={scale}
-                position={position}
-                rotation={rotation}
-            />
-        </group>
-    );
+    position?: { x: number; y: number; z: number };
+    rotation?: { x: number; y: number; z: number };
+    backgroundColor?: string;
+    autoRotate?: boolean;
+    className?: string;
 }
 
 export default function ModelLoader({
     modelPath,
     scale = 1,
-    position = [0, 0, 0],
-    rotation = [0, 0, 0],
-    enableOrbitControls = true,
-    enablePresentationControls = false,
-    environmentPreset = 'city',
-    onLoadingComplete,
-    ...props
+    position = { x: 0, y: 0, z: 0 },
+    rotation = { x: 0, y: 0, z: 0 },
+    backgroundColor = '#000000',
+    autoRotate = true,
+    className = ''
 }: ModelLoaderProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (onLoadingComplete) {
-            onLoadingComplete();
-        }
-    }, [onLoadingComplete]);
+        if (!containerRef.current) return;
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(backgroundColor);
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            containerRef.current.clientWidth / containerRef.current.clientHeight,
+            0.1,
+            1000
+        );
+        camera.position.z = 5;
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        containerRef.current.appendChild(renderer.domElement);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = autoRotate;
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        const loader = new GLTFLoader();
 
-    const ModelWithControls = () => (
-        <>
-            {enablePresentationControls ? (
-                <PresentationControls
-                    global
-                    rotation={[0, 0, 0]}
-                    polar={[-Math.PI / 4, Math.PI / 4]}
-                    azimuth={[-Math.PI / 4, Math.PI / 4]}
-                    config={{ mass: 2, tension: 400 }}
-                    snap={{ mass: 4, tension: 300 }}
-                >
-                    <Model
-                        modelPath={modelPath}
-                        scale={scale}
-                        position={position}
-                        rotation={rotation}
-                        {...props}
-                    />
-                </PresentationControls>
-            ) : (
-                <Model
-                    modelPath={modelPath}
-                    scale={scale}
-                    position={position}
-                    rotation={rotation}
-                    {...props}
-                />
-            )}
+        loader.load(
+            modelPath,
+            (gltf) => {
+                const model = gltf.scene;
+                model.scale.set(scale, scale, scale);
+                model.position.set(position.x, position.y, position.z);
+                model.rotation.set(rotation.x, rotation.y, rotation.z);
+                scene.add(model);
+                setLoading(false);
+            },
+            (xhr) => {
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+            },
+            (error) => {
+                console.error('Error loading model:', error);
+                setError('Failed to load 3D model');
+                setLoading(false);
+            }
+        );
 
-            {enableOrbitControls && !enablePresentationControls && (
-                <OrbitControls
-                    enableZoom={true}
-                    enablePan={false}
-                    minPolarAngle={0}
-                    maxPolarAngle={Math.PI / 2}
-                />
-            )}
-        </>
-    );
+        const handleResize = () => {
+            if (!containerRef.current) return;
+            camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+        };
+        window.addEventListener('resize', handleResize);
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        };
+        animate();
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            if (containerRef.current && containerRef.current.contains(renderer.domElement)) {
+                containerRef.current.removeChild(renderer.domElement);
+            }
+            renderer.dispose();
+        };
+    }, [modelPath, scale, position, rotation, backgroundColor, autoRotate]);
 
     return (
-        <Suspense fallback={null}>
-            <ModelWithControls />
-            <Environment preset={environmentPreset} />
-        </Suspense>
+        <div
+            ref={containerRef}
+            className={`model-loader ${className}`}
+            style={{ width: '100%', height: '100%', position: 'relative' }}
+        >
+            {loading && (
+                <div className="model-loader-overlay">
+                    <div className="model-loader-spinner">Loading...</div>
+                </div>
+            )}
+            {error && (
+                <div className="model-loader-error">{error}</div>
+            )}
+        </div>
     );
 } 

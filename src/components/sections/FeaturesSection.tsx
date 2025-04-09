@@ -1,81 +1,88 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import ThreeScene from '../3d/ThreeScene';
-import Section from '../ui/Section';
-import useScrollAnimation from '../../hooks/useScrollAnimation';
+import Section from './Section';
 
-interface FeatureProps {
+interface Feature {
     title: string;
     description: string;
-    icon?: React.ReactNode;
-    geometry?: 'box' | 'sphere' | 'torus';
-    color?: string;
+    icon: string;
 }
 
-const Feature = ({ title, description, geometry = 'box', color = '#5380f4' }: FeatureProps) => {
-    const [ref, isVisible] = useScrollAnimation<HTMLDivElement>();
-
-    return (
-        <div
-            ref={ref}
-            className={`flex flex-col items-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-        >
-            <div className="w-32 h-32 mb-6">
-                <Canvas camera={{ position: [0, 0, 5], fov: 40 }}>
-                    <ambientLight intensity={0.5} />
-                    <pointLight position={[10, 10, 10]} />
-                    <ThreeScene geometry={geometry} color={color} size={1.5} />
-                    <OrbitControls
-                        enableZoom={false}
-                        enablePan={false}
-                        autoRotate
-                        autoRotateSpeed={2}
-                    />
-                    <Environment preset="sunset" />
-                </Canvas>
-            </div>
-            <h3 className="text-xl font-bold mb-2">{title}</h3>
-            <p className="text-center text-gray-600">{description}</p>
-        </div>
-    );
-};
-
 export default function FeaturesSection() {
-    const features: FeatureProps[] = [
+    const [activeFeature, setActiveFeature] = useState<number | null>(null);
+
+    const features: Feature[] = [
         {
             title: 'Interactive 3D Models',
-            description: 'Engage your users with interactive 3D models that they can manipulate.',
-            geometry: 'sphere',
-            color: '#5380f4'
+            description: 'Import and display interactive 3D models with full control over lighting, materials and animations.',
+            icon: '🔮'
         },
         {
-            title: 'Stunning Animations',
-            description: 'Create eye-catching animations to bring your website to life.',
-            geometry: 'box',
-            color: '#f45380'
+            title: 'Spline Integration',
+            description: 'Seamlessly integrate with Spline.design for easy 3D scene creation and management.',
+            icon: '🎨'
         },
         {
-            title: 'Performance Optimized',
-            description: 'Built with performance in mind so your 3D experiences run smoothly.',
-            geometry: 'torus',
-            color: '#53f480'
+            title: 'Animation System',
+            description: 'Create smooth animations and transitions with Framer Motion and Three.js.',
+            icon: '✨'
+        },
+        {
+            title: 'Responsive Design',
+            description: 'All 3D elements and UI components automatically adapt to different screen sizes.',
+            icon: '📱'
         }
     ];
 
-    return (
-        <Section id="features" bgColor="bg-gray-50">
-            <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Amazing Features</h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Create stunning 3D experiences for the web with our powerful tools and components.
-                </p>
-            </div>
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                delayChildren: 0.3,
+                staggerChildren: 0.1
+            }
+        }
+    };
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                {features.map((feature, index) => (
-                    <Feature key={index} {...feature} />
-                ))}
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0.5 }
+        }
+    };
+
+    return (
+        <Section id="features" title="Features">
+            <div className="features-grid">
+                <motion.div
+                    className="features-list"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                >
+                    {features.map((feature, index) => (
+                        <motion.div
+                            key={index}
+                            className={`feature-card ${activeFeature === index ? 'feature-active' : ''}`}
+                            variants={itemVariants}
+                            onMouseEnter={() => setActiveFeature(index)}
+                            onMouseLeave={() => setActiveFeature(null)}
+                        >
+                            <div className="feature-icon">{feature.icon}</div>
+                            <h3 className="feature-title">{feature.title}</h3>
+                            <p className="feature-description">{feature.description}</p>
+                        </motion.div>
+                    ))}
+                </motion.div>
+
+                <div className="features-3d">
+                    <ThreeScene backgroundColor="#111827" />
+                </div>
             </div>
         </Section>
     );

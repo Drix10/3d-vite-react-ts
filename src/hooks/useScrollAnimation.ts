@@ -1,49 +1,52 @@
-import { useEffect, useState, useRef, RefObject } from 'react';
+import { useState, useEffect, RefObject } from 'react';
 
 interface ScrollAnimationOptions {
     threshold?: number;
-    rootMargin?: string;
     triggerOnce?: boolean;
 }
 
-export default function useScrollAnimation<T extends HTMLElement = HTMLElement>(
+/**
+ * Custom hook for scroll-based animations
+ * @param ref Reference to the element to observe
+ * @param options Configuration options
+ * @returns Object containing animation states
+ */
+export default function useScrollAnimation(
+    ref: RefObject<HTMLElement>,
     options: ScrollAnimationOptions = {}
-): [RefObject<T>, boolean] {
-    const {
-        threshold = 0.1,
-        rootMargin = '0px',
-        triggerOnce = true
-    } = options;
-
+) {
+    const { threshold = 0.2, triggerOnce = true } = options;
     const [isVisible, setIsVisible] = useState(false);
-    const elementRef = useRef<T>(null);
+    const [hasTriggered, setHasTriggered] = useState(false);
 
     useEffect(() => {
-        const element = elementRef.current;
-        if (!element) return;
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    if (triggerOnce && observer && element) {
-                        observer.unobserve(element);
-                    }
-                } else if (!triggerOnce) {
+        if (!ref.current) return;
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold,
+        };
+        const observer = new IntersectionObserver((entries) => {
+            const [entry] = entries;
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                if (triggerOnce) {
+                    setHasTriggered(true);
+                    observer.unobserve(entry.target);
+                }
+            } else {
+                if (!triggerOnce || !hasTriggered) {
                     setIsVisible(false);
                 }
-            },
-            { threshold, rootMargin }
-        );
-
-        observer.observe(element);
-
+            }
+        }, observerOptions);
+        observer.observe(ref.current);
         return () => {
-            if (element) {
-                observer.unobserve(element);
+            if (ref.current) {
+                observer.unobserve(ref.current);
             }
         };
-    }, [threshold, rootMargin, triggerOnce]);
+    }, [ref, threshold, triggerOnce, hasTriggered]);
 
-    return [elementRef, isVisible];
+    return { isVisible, hasTriggered };
 } 
