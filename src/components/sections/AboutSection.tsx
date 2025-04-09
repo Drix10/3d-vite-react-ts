@@ -48,7 +48,7 @@ export default function AboutSection() {
                 </motion.div>
 
                 <div className="about-3d">
-                    <Spline scene="https://prod.spline.design/example-scene-id/scene.splinecode" />
+                    <Spline scene="https://example.spline.design/scene.splinecode" />
                 </div>
             </div>
         </Section>

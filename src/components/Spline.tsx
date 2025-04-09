@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Application } from '@splinetool/runtime';
+import ThreeScene from './3d/ThreeScene';
 
 interface SplineProps {
     scene: string;
     className?: string;
+    backgroundColor?: string;
 }
 
-export default function Spline({ scene, className = '' }: SplineProps) {
+export default function Spline({ scene, className = '', backgroundColor = '#111827' }: SplineProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -48,18 +50,22 @@ export default function Spline({ scene, className = '' }: SplineProps) {
     }, [scene]);
 
     return (
-        <div className={`spline-container ${className}`} style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div className={`spline-container ${className}`} style={{ width: '100%', height: '100%', position: 'relative', minHeight: '300px' }}>
             <canvas
                 ref={canvasRef}
                 className="spline-canvas"
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: '100%', height: '100%', display: error ? 'none' : 'block' }}
             />
             {loading && (
                 <div className="spline-loader">
                     <div className="spline-spinner">Loading...</div>
                 </div>
             )}
-            {error && <div className="spline-error">{error}</div>}
+            {error && (
+                <div className="spline-fallback">
+                    <ThreeScene backgroundColor={backgroundColor} />
+                </div>
+            )}
         </div>
     );
 } 

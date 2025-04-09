@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { createSampleScene } from '../../utils/sampleModelHelper';
 
 interface ModelLoaderProps {
     modelPath: string;
@@ -18,7 +19,7 @@ export default function ModelLoader({
     scale = 1,
     position = { x: 0, y: 0, z: 0 },
     rotation = { x: 0, y: 0, z: 0 },
-    backgroundColor = '#000000',
+    backgroundColor = '#111827',
     autoRotate = true,
     className = ''
 }: ModelLoaderProps) {
@@ -45,32 +46,41 @@ export default function ModelLoader({
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.autoRotate = autoRotate;
+
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(1, 1, 1);
         scene.add(directionalLight);
-        const loader = new GLTFLoader();
 
-        loader.load(
-            modelPath,
-            (gltf) => {
-                const model = gltf.scene;
-                model.scale.set(scale, scale, scale);
-                model.position.set(position.x, position.y, position.z);
-                model.rotation.set(rotation.x, rotation.y, rotation.z);
-                scene.add(model);
-                setLoading(false);
-            },
-            (xhr) => {
-                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
-            },
-            (error) => {
-                console.error('Error loading model:', error);
-                setError('Failed to load 3D model');
-                setLoading(false);
-            }
-        );
+        const useFallback = modelPath.includes('example') || !modelPath.startsWith('/');
+
+        if (useFallback) {
+            createSampleScene(scene);
+            setLoading(false);
+        } else {
+            const loader = new GLTFLoader();
+            loader.load(
+                modelPath,
+                (gltf) => {
+                    const model = gltf.scene;
+                    model.scale.set(scale, scale, scale);
+                    model.position.set(position.x, position.y, position.z);
+                    model.rotation.set(rotation.x, rotation.y, rotation.z);
+                    scene.add(model);
+                    setLoading(false);
+                },
+                (xhr) => {
+                    console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+                },
+                (err) => {
+                    console.error('Error loading model:', err);
+                    createSampleScene(scene);
+                    setError('Using fallback 3D objects');
+                    setLoading(false);
+                }
+            );
+        }
 
         const handleResize = () => {
             if (!containerRef.current) return;
@@ -83,6 +93,13 @@ export default function ModelLoader({
         const animate = () => {
             requestAnimationFrame(animate);
             controls.update();
+
+            scene.traverse((object) => {
+                if (object.userData.animate) {
+                    object.userData.animate(0.01);
+                }
+            });
+
             renderer.render(scene, camera);
         };
         animate();
@@ -100,7 +117,7 @@ export default function ModelLoader({
         <div
             ref={containerRef}
             className={`model-loader ${className}`}
-            style={{ width: '100%', height: '100%', position: 'relative' }}
+            style={{ width: '100%', height: '100%', position: 'relative', minHeight: '400px' }}
         >
             {loading && (
                 <div className="model-loader-overlay">
@@ -108,7 +125,7 @@ export default function ModelLoader({
                 </div>
             )}
             {error && (
-                <div className="model-loader-error">{error}</div>
+                <div className="model-loader-message">{error}</div>
             )}
         </div>
     );

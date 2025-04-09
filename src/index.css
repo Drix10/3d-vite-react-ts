@@ -4,7 +4,7 @@
     font-weight: 400;
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
+    background-color: #111827;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -27,7 +27,7 @@ body {
     min-height: 100vh;
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
+    background-color: #111827;
 }
 
 h1,
@@ -43,7 +43,7 @@ h6 {
 #root {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2rem 1rem;
     text-align: center;
     width: 100%;
 }
@@ -122,12 +122,23 @@ button:focus-visible {
 
 /* Section component styles */
 .section {
-    padding: 4rem 1rem;
+    padding: 4rem 0;
+    margin: 2rem 0;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
 }
 
 .section-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1rem;
 }
 
 .section-full-height {
@@ -151,6 +162,10 @@ button:focus-visible {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    margin-bottom: 2rem;
 }
 
 .header-title {
@@ -178,7 +193,9 @@ button:focus-visible {
     padding: 2rem 1rem;
     text-align: center;
     margin-top: 4rem;
-    background-color: #1a1a1a;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
     color: white;
 }
 
@@ -241,16 +258,33 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
     :root {
         color: #213547;
-        background-color: #ffffff;
+        background-color: #f5f7fa;
     }
 
     body {
         color: #213547;
-        background-color: #ffffff;
+        background-color: #f5f7fa;
     }
 
     button {
-        background-color: #f9f9f9;
+        background-color: #f1f5f9;
+    }
+
+    .section,
+    .feature-card,
+    .model-info,
+    .contact-form-wrapper,
+    .header,
+    .footer,
+    .about-feature {
+        background-color: rgba(255, 255, 255, 0.7);
+        color: #1a1a1a;
+    }
+
+    .feature-description,
+    .model-description,
+    .about-feature-text {
+        color: #4b5563;
     }
 }
 
@@ -258,14 +292,14 @@ button:focus-visible {
 .example {
     padding: 2rem;
     margin: 2rem 0;
-    border: 1px solid #ddd;
+    border: 1px solid #333;
     border-radius: 8px;
-    background-color: #f8f8f8;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .example h2 {
     margin-bottom: 1rem;
-    color: #333;
+    color: #eee;
 }
 
 .button-group {
@@ -274,32 +308,23 @@ button:focus-visible {
     margin-top: 1.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-    .example {
-        background-color: #333;
-        border-color: #444;
-    }
-
-    .example h2 {
-        color: #eee;
-    }
-}
-
-/* Add these 3D component styles */
-
-/* Three.js scenes */
 .three-scene {
     width: 100%;
     height: 100%;
+    min-height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* Hero section styles */
 .hero-3d {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 80vh;
     position: relative;
     overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 3rem;
 }
 
 .hero-3d-content {
@@ -312,6 +337,8 @@ button:focus-visible {
     padding: 2rem;
     text-align: center;
     flex: 1;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
 }
 
 .hero-3d-text {
@@ -349,11 +376,12 @@ button:focus-visible {
     z-index: 1;
 }
 
-/* Model loader styles */
 .model-loader {
     position: relative;
     overflow: hidden;
-    border-radius: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    min-height: 400px;
 }
 
 .model-loader-overlay {
@@ -372,28 +400,30 @@ button:focus-visible {
 .model-loader-spinner {
     color: white;
     font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 1rem 2rem;
+    border-radius: 8px;
 }
 
-.model-loader-error {
+.model-loader-message {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    top: 1rem;
+    right: 1rem;
     background-color: rgba(0, 0, 0, 0.7);
-    color: #ef4444;
+    color: #f59e0b;
     font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
     z-index: 10;
 }
 
-/* Spline container styles */
 .spline-container {
     position: relative;
     overflow: hidden;
-    border-radius: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    min-height: 300px;
 }
 
 .spline-canvas {
@@ -417,24 +447,20 @@ button:focus-visible {
 .spline-spinner {
     color: white;
     font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 1rem 2rem;
+    border-radius: 8px;
 }
 
-.spline-error {
+.spline-fallback {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #ef4444;
-    font-weight: bold;
-    z-index: 10;
+    z-index: 5;
 }
 
-/* Features section styles */
 .features-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -449,7 +475,7 @@ button:focus-visible {
 
 .feature-card {
     padding: 1.5rem;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -458,7 +484,7 @@ button:focus-visible {
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 .feature-icon {
@@ -478,9 +504,10 @@ button:focus-visible {
 }
 
 .features-3d {
-    height: 300px;
-    border-radius: 0.5rem;
+    height: 350px;
+    border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 /* About section styles */
@@ -508,6 +535,10 @@ button:focus-visible {
 
 .about-feature {
     text-align: center;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
 }
 
 .about-feature-icon {
@@ -527,9 +558,10 @@ button:focus-visible {
 }
 
 .about-3d {
-    height: 300px;
-    border-radius: 0.5rem;
+    height: 350px;
+    border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 /* Model demo section styles */
@@ -575,7 +607,7 @@ button:focus-visible {
     padding: 1.5rem;
     background-color: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
-    border-radius: 0.5rem;
+    border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -591,8 +623,9 @@ button:focus-visible {
 
 .model-viewer {
     height: 400px;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 /* Contact section styles */
@@ -606,7 +639,7 @@ button:focus-visible {
     padding: 1.5rem;
     background-color: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
-    border-radius: 0.5rem;
+    border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -674,9 +707,10 @@ button:focus-visible {
 }
 
 .contact-3d {
-    height: 300px;
-    border-radius: 0.5rem;
+    height: 350px;
+    border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 /* Media queries for responsive design */
@@ -705,5 +739,9 @@ button:focus-visible {
 
     .model-viewer {
         height: 500px;
+    }
+
+    .footer-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
