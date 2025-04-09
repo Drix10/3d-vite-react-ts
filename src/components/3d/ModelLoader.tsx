@@ -40,7 +40,7 @@ export default function ModelLoader({
         camera.position.z = 5;
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         containerRef.current.appendChild(renderer.domElement);
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;

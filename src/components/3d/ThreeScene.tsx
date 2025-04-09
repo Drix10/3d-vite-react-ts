@@ -21,6 +21,7 @@ export default function ThreeScene({
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         containerRef.current.appendChild(renderer.domElement);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
