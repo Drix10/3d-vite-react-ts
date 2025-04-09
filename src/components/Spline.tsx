@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import SplineLoader from '@splinetool/loader';
@@ -8,15 +8,16 @@ import SplineLoader from '@splinetool/loader';
 export default function SplineScene() {
   const mountRef = useRef<HTMLDivElement>(null);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#2d2e32');
 
-    // Perspective Camera for better depth perception
     const camera = new THREE.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
@@ -25,36 +26,47 @@ export default function SplineScene() {
     );
     camera.position.set(0, 0, 1000);
 
-    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
+    rendererRef.current = renderer;
     mountRef.current.appendChild(renderer.domElement);
 
-    // Load Spline Scene with Animations
     const loader = new SplineLoader();
-    loader.load('https://prod.spline.design/tuL7yVjc16Ad1lX0/scene.splinecode', (splineScene) => {
-      scene.add(splineScene);
+    try {
+      loader.load('https://prod.spline.design/tuL7yVjc16Ad1lX0/scene.splinecode', (splineScene) => {
+        scene.add(splineScene);
+        setIsLoading(false);
 
-      // Handle animations
-      if (splineScene.animations.length > 0) {
-        const mixer = new THREE.AnimationMixer(splineScene);
-        mixerRef.current = mixer;
+        if (splineScene.animations.length > 0) {
+          const mixer = new THREE.AnimationMixer(splineScene);
+          mixerRef.current = mixer;
 
-        splineScene.animations.forEach((clip) => {
-          const action = mixer.clipAction(clip);
-          action.play();
+          splineScene.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip);
+            action.play();
+          });
+        }
+      },
+        (xhr) => { },
+        (err) => {
+          console.error('Error loading Spline scene:', err);
+          setError('Failed to load 3D scene. Please try again later.');
+          setIsLoading(false);
         });
-      }
-    });
+    } catch (err) {
+      console.error('Error in Spline loader setup:', err);
+      setError('Failed to initialize 3D scene');
+      setIsLoading(false);
+    }
 
-    // Orbit Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.125;
 
-    // Animation loop
     const clock = new THREE.Clock();
+    let animationId: number;
+
     const animate = () => {
       controls.update();
 
@@ -63,11 +75,10 @@ export default function SplineScene() {
       }
 
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
     };
     animate();
 
-    // Resize handling
     const onWindowResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -75,13 +86,41 @@ export default function SplineScene() {
     };
     window.addEventListener('resize', onWindowResize);
 
-    // Cleanup
     return () => {
       window.removeEventListener('resize', onWindowResize);
-      mountRef.current?.removeChild(renderer.domElement);
-      renderer.dispose();
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      scene.clear();
+      if (rendererRef.current) {
+        if (mountRef.current) {
+          mountRef.current.removeChild(rendererRef.current.domElement);
+        }
+        rendererRef.current.dispose();
+      }
     };
   }, []);
 
-  return <div ref={mountRef} className="w-full h-full" />;
+  return (
+    <div className="relative w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-10">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Loading 3D scene...</p>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-10">
+          <div className="text-white text-center p-4 bg-red-500 rounded-md">
+            <p>{error}</p>
+          </div>
+        </div>
+      )}
+
+      <div ref={mountRef} className="w-full h-full" />
+    </div>
+  );
 }

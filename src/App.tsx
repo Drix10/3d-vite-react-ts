@@ -1,25 +1,25 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import ThreeScene from './components/ThreeScene';
-import SplineScene from './components/Spline';
+import Layout from './components/layout/Layout';
+import Hero3D from './components/3d/Hero3D';
+import FeaturesSection from './components/sections/FeaturesSection';
+import AboutSection from './components/sections/AboutSection';
+import ModelDemoSection from './components/sections/ModelDemoSection';
+import ContactSection from './components/sections/ContactSection';
+import './index.css';
+
 function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <p>Start prompting (or editing) with Coslynx.com :)</p>
-      <div className="w-[400px] h-[400px]">
-        <Canvas
-          camera={{ position: [0, 0, 5] }}
-          className="w-full h-full"
-        >
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} />
-          <ThreeScene />
-        </Canvas>
-      </div>
-     
-        <SplineScene />
-     
-    </div>
+    <Layout title="3D Landing Page">
+      <Hero3D
+        title="Create Stunning 3D Experiences"
+        subtitle="A modern React template for building immersive 3D landing pages"
+        ctaText="Explore Features"
+        ctaLink="#features"
+      />
+      <FeaturesSection />
+      <AboutSection />
+      <ModelDemoSection />
+      <ContactSection />
+    </Layout>
   );
 }
 
