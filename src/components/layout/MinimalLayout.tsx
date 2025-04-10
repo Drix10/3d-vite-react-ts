@@ -5,7 +5,6 @@ interface MinimalLayoutProps {
     children: React.ReactNode;
 }
 
-// Common navigation items
 const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Experience', path: '#experience' },
@@ -14,7 +13,6 @@ const navItems = [
     { name: 'Contact', path: '#contact' }
 ];
 
-// Modified NavLink to handle hover effects
 const NavLink = ({
     item,
     style,
@@ -26,6 +24,7 @@ const NavLink = ({
     onClick?: () => void,
     hoverEffect?: boolean
 }) => {
+    const location = useLocation();
     const [isHovered, setIsHovered] = useState(false);
 
     const handleMouseEnter = () => setIsHovered(true);
@@ -38,6 +37,21 @@ const NavLink = ({
         return (
             <Link
                 to={item.path}
+                style={combinedStyles}
+                onClick={onClick}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                {item.name}
+            </Link>
+        );
+    } else if (item.path.startsWith('#')) {
+        const isHomePage = location.pathname === '/';
+        const fullPath = isHomePage ? item.path : `/${item.path}`;
+
+        return (
+            <Link
+                to={fullPath}
                 style={combinedStyles}
                 onClick={onClick}
                 onMouseEnter={handleMouseEnter}

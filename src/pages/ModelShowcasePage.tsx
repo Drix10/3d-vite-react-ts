@@ -1,35 +1,102 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ModelLoader from '../components/3d/ModelLoader';
 
 export default function ModelShowcasePage() {
+    const sampleModels = [
+        {
+            name: "Example Model",
+            path: "/models/example.glb",
+            description: "A sample 3D model to demonstrate the model loader component."
+        },
+        {
+            name: "Geometric Shapes",
+            path: "/models/example2.glb",
+            description: "A collection of geometric shapes rendered with ThreeJS."
+        },
+        {
+            name: "Sample Objects",
+            path: "/models/example3.glb",
+            description: "Demo objects with different materials and lighting effects."
+        }
+    ];
+
+    const [selectedModel, setSelectedModel] = useState(sampleModels[0]);
+    const [autoRotate, setAutoRotate] = useState(true);
+    const [backgroundColor, setBackgroundColor] = useState('#111827');
+
     return (
         <div className="section">
             <div className="container">
                 <h1>3D Model Showcase</h1>
                 <p className="section-description">
-                    This page would normally display a carousel of 3D models.
+                    View interactive 3D models with customizable display options.
                 </p>
 
                 <div style={{
-                    height: '400px',
                     display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: '#111827',
-                    border: '1px solid #333',
-                    borderRadius: '8px',
-                    marginTop: '40px'
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                    marginTop: '24px',
+                    marginBottom: '24px'
                 }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <h2>Model Carousel Component</h2>
-                        <p>The ModelCarousel component has been removed from this template.</p>
+                    {sampleModels.map((model, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setSelectedModel(model)}
+                            className={`model-tab ${selectedModel.path === model.path ? 'model-tab-active' : ''}`}
+                        >
+                            {model.name}
+                        </button>
+                    ))}
+                </div>
+
+                <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    marginBottom: '24px',
+                    flexWrap: 'wrap',
+                    alignItems: 'center'
+                }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                            type="checkbox"
+                            checked={autoRotate}
+                            onChange={(e) => setAutoRotate(e.target.checked)}
+                        />
+                        Auto Rotate
+                    </label>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label htmlFor="bgColor">Background:</label>
+                        <input
+                            id="bgColor"
+                            type="color"
+                            value={backgroundColor}
+                            onChange={(e) => setBackgroundColor(e.target.value)}
+                            style={{ width: '40px', height: '40px', cursor: 'pointer' }}
+                        />
                     </div>
                 </div>
 
-                <div style={{ marginTop: '40px', textAlign: 'left' }}>
-                    <h2>About This Page</h2>
-                    <p>
-                        This page is a placeholder for a 3D model showcase. You can implement your own 3D model viewer here.
-                    </p>
+                <div style={{ height: '500px', marginBottom: '40px' }}>
+                    <ModelLoader
+                        modelPath={selectedModel.path}
+                        backgroundColor={backgroundColor}
+                        autoRotate={autoRotate}
+                    />
+                </div>
+
+                <div className="model-info">
+                    <h2>{selectedModel.name}</h2>
+                    <p>{selectedModel.description}</p>
+                    <div style={{ marginTop: '20px' }}>
+                        <h3>Interaction Guide</h3>
+                        <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
+                            <p>Drag to rotate the view</p>
+                            <p>Scroll to zoom in and out</p>
+                            <p>Double-click to reset the view</p>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
