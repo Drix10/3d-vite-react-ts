@@ -27,11 +27,23 @@ const NavLink = ({
     const location = useLocation();
     const [isHovered, setIsHovered] = useState(false);
 
+    // Check if current link is active
+    const isActive =
+        item.path === '/' ? location.pathname === '/' :
+            item.path.startsWith('#') ? location.hash === item.path :
+                location.pathname === item.path;
+
     const handleMouseEnter = () => setIsHovered(true);
     const handleMouseLeave = () => setIsHovered(false);
 
+    const activeStyles = isActive ? {
+        color: '#6366f1',
+        fontWeight: 'bold' as const,
+        position: 'relative' as const
+    } : {};
+
     const hoverStyles = hoverEffect && isHovered ? { color: '#6366f1' } : {};
-    const combinedStyles = { ...style, ...hoverStyles };
+    const combinedStyles = { ...style, ...activeStyles, ...hoverStyles };
 
     if (item.path.startsWith('/')) {
         return (
@@ -46,19 +58,39 @@ const NavLink = ({
             </Link>
         );
     } else if (item.path.startsWith('#')) {
+        // Get the section ID from the hash
+        const sectionId = item.path.substring(1);
         const isHomePage = location.pathname === '/';
-        const fullPath = isHomePage ? item.path : `/${item.path}`;
+
+        const handleClick = (e: React.MouseEvent) => {
+            e.preventDefault();
+
+            // If not on homepage, navigate to home first
+            if (!isHomePage) {
+                window.location.href = `/${item.path}`;
+                return;
+            }
+
+            // If already on homepage, scroll to the section
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Call additional onClick if provided
+            if (onClick) onClick();
+        };
 
         return (
-            <Link
-                to={fullPath}
+            <a
+                href={item.path}
                 style={combinedStyles}
-                onClick={onClick}
+                onClick={handleClick}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
                 {item.name}
-            </Link>
+            </a>
         );
     } else {
         return (
