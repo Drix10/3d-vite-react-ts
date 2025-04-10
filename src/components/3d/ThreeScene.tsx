@@ -1,101 +1,107 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+declare global {
+    interface Navigator {
+        deviceMemory?: number;
+    }
+}
 
 interface ThreeSceneProps {
-    className?: string;
     backgroundColor?: string;
 }
 
-export default function ThreeScene({
-    className = '',
-    backgroundColor = '#111827'
-}: ThreeSceneProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
+export default function ThreeScene({ backgroundColor = '#121212' }: ThreeSceneProps) {
+    const mountRef = useRef<HTMLDivElement>(null);
+    const [isLowPerformance, setIsLowPerformance] = useState(false);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        const checkPerformance = () => {
+            const isMobile = 'ontouchstart' in window && window.innerWidth < 768;
+
+            const hasLowRAM = navigator.deviceMemory !== undefined && navigator.deviceMemory < 4;
+
+            setIsLowPerformance(isMobile || hasLowRAM);
+        };
+
+        checkPerformance();
+
+        if (!mountRef.current) return;
+
+        const width = mountRef.current.clientWidth;
+        const height = mountRef.current.clientHeight;
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(backgroundColor);
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 5);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        containerRef.current.appendChild(renderer.domElement);
+        const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+        camera.position.z = 5;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: !isLowPerformance });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(isLowPerformance ? 1 : window.devicePixelRatio);
+        mountRef.current.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(1, 1, 1);
-        scene.add(dirLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(0, 10, 5);
+        scene.add(directionalLight);
 
-        const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const cubeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x3b82f6,
-            metalness: 0.3,
-            roughness: 0.4
+        const geometry = isLowPerformance
+            ? new THREE.IcosahedronGeometry(2, 1)  
+            : new THREE.IcosahedronGeometry(2, 2); 
+
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x3366ff,
+            metalness: 0.2,
+            roughness: 0.5,
+            flatShading: isLowPerformance
         });
-        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.position.x = -1.5;
-        scene.add(cube);
 
-        const sphereGeometry = new THREE.SphereGeometry(0.7, 32, 32);
-        const sphereMaterial = new THREE.MeshStandardMaterial({
-            color: 0xec4899,
-            metalness: 0.7,
-            roughness: 0.2
-        });
-        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        scene.add(sphere);
-
-        const torusGeometry = new THREE.TorusKnotGeometry(0.5, 0.2, 128, 32);
-        const torusMaterial = new THREE.MeshStandardMaterial({
-            color: 0x34d399,
-            metalness: 0.5,
-            roughness: 0.3
-        });
-        const torusKnot = new THREE.Mesh(torusGeometry, torusMaterial);
-        torusKnot.position.x = 1.5;
-        scene.add(torusKnot);
-
-        const handleResize = () => {
-            if (!containerRef.current) return;
-            camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-        };
-        window.addEventListener('resize', handleResize);
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
 
         const animate = () => {
             requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
 
-            sphere.rotation.y += 0.01;
+            mesh.rotation.x += 0.005;
+            mesh.rotation.y += 0.01;
 
-            torusKnot.rotation.x += 0.01;
-            torusKnot.rotation.y += 0.01;
-
+            controls.update();
             renderer.render(scene, camera);
         };
         animate();
 
+        const handleResize = () => {
+            if (!mountRef.current) return;
+
+            const width = mountRef.current.clientWidth;
+            const height = mountRef.current.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        };
+
+        window.addEventListener('resize', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
-            if (containerRef.current) {
-                containerRef.current.removeChild(renderer.domElement);
+            if (mountRef.current) {
+                mountRef.current.removeChild(renderer.domElement);
             }
-            cubeGeometry.dispose();
-            cubeMaterial.dispose();
-            sphereGeometry.dispose();
-            sphereMaterial.dispose();
-            torusGeometry.dispose();
-            torusMaterial.dispose();
+
+            geometry.dispose();
+            material.dispose();
             renderer.dispose();
         };
-    }, [backgroundColor]);
+    }, [backgroundColor, isLowPerformance]);
 
-    return <div ref={containerRef} className={`three-scene ${className}`} style={{ width: '100%', height: '100%', minHeight: '300px' }} />;
+    return <div ref={mountRef} className="three-scene" style={{ width: '100%', height: '100%' }} />;
 } 

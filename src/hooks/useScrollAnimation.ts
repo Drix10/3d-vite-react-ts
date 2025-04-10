@@ -5,12 +5,6 @@ interface ScrollAnimationOptions {
     triggerOnce?: boolean;
 }
 
-/**
- * Custom hook for scroll-based animations
- * @param ref Reference to the element to observe
- * @param options Configuration options
- * @returns Object containing animation states
- */
 export default function useScrollAnimation(
     ref: RefObject<HTMLElement>,
     options: ScrollAnimationOptions = {}

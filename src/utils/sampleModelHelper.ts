@@ -1,8 +1,5 @@
 import * as THREE from 'three';
 
-/**
- * Creates a sample cube with basic material
- */
 export function createSampleCube(
     size: number = 1,
     color: string = '#3b82f6',
@@ -19,9 +16,6 @@ export function createSampleCube(
     return cube;
 }
 
-/**
- * Creates a sample sphere with basic material
- */
 export function createSampleSphere(
     radius: number = 0.5,
     color: string = '#ec4899',
@@ -38,9 +32,6 @@ export function createSampleSphere(
     return sphere;
 }
 
-/**
- * Creates a torus knot with normal material for demonstration
- */
 export function createTorusKnot(
     radius: number = 0.5,
     tube: number = 0.2,
@@ -57,9 +48,6 @@ export function createTorusKnot(
     return torusKnot;
 }
 
-/**
- * Creates a sample scene with multiple objects
- */
 export function createSampleScene(scene: THREE.Scene): void {
     const cube = createSampleCube(1, '#3b82f6', { x: -1.5, y: 0, z: 0 });
     const sphere = createSampleSphere(0.7, '#ec4899', { x: 0, y: 0, z: 0 });
