@@ -12,24 +12,20 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const ModelShowcasePage = lazy(() => import('./pages/ModelShowcasePage'));
 
-// Custom hook to handle scroll to hash
 function useScrollToHash() {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if URL has a hash
     if (location.hash) {
       const id = location.hash.substring(1);
       const element = document.getElementById(id);
 
       if (element) {
-        // Wait a bit for components to render
         setTimeout(() => {
           element.scrollIntoView({ behavior: 'smooth' });
         }, 500);
       }
     } else {
-      // Scroll to top when navigating to a page without hash
       window.scrollTo(0, 0);
     }
   }, [location]);
@@ -56,7 +52,6 @@ const LoadingFallback = () => (
 
 function Homepage() {
   const [isMobile, setIsMobile] = useState(false);
-  // Apply the scroll to hash hook
   useScrollToHash();
 
   useEffect(() => {
@@ -173,15 +168,12 @@ function Homepage() {
 }
 
 export default function App() {
-  // Add a scroll handler for hash in URL
   useEffect(() => {
-    // Check if URL has a hash and we're on the homepage
     if (window.location.hash && window.location.pathname === '/') {
       const id = window.location.hash.substring(1);
       const element = document.getElementById(id);
 
       if (element) {
-        // Wait a bit for components to render
         setTimeout(() => {
           element.scrollIntoView({ behavior: 'smooth' });
         }, 500);
