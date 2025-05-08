@@ -1,72 +1,27 @@
-import { Suspense, lazy, useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingHero from './components/sections/LandingHero';
 import ScrollScene from './components/3d/ScrollScene';
 import AdvancedScene from './components/3d/AdvancedScene';
 import MinimalLayout from './components/layout/MinimalLayout';
 import { Code, Cpu, Star, Zap, Mail, Send, Box } from 'lucide-react';
-
-
-const ExperiencePage = lazy(() => import('./pages/ExperiencePage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const ModelShowcasePage = lazy(() => import('./pages/ModelShowcasePage'));
-
-function useScrollToHash() {
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.hash) {
-      const id = location.hash.substring(1);
-      const element = document.getElementById(id);
-
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 500);
-      }
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [location]);
-}
+import { useScrollToHash } from './hooks/useScrollToHash';
 
 const LoadingFallback = () => (
-  <div style={{
-    width: '100%',
-    height: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#111827',
-    color: 'white'
-  }}>
-    <div style={{
-      textAlign: 'center'
-    }}>
-      <div className="loader"></div>
-      <p style={{ marginTop: '1rem' }}>Loading 3D Experience...</p>
+  <div className="w-full h-screen flex justify-center items-center bg-gray-900 text-white">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
+      <p className="mt-4">Loading 3D Experience...</p>
     </div>
   </div>
 );
 
 function Homepage() {
-  const [isMobile, setIsMobile] = useState(false);
   useScrollToHash();
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   return (
     <>
-      <section id="home">
+      <section id="home" className="relative min-h-screen w-full bg-gray-900">
         <LandingHero
           title="Immersive 3D Web"
           description="Create stunning interactive 3D experiences using React, Three.js, and GSAP"
@@ -75,7 +30,10 @@ function Homepage() {
         />
       </section>
 
-      <section id="experience" style={{ height: '200vh' }}>
+      <section
+        id="experience"
+        className="relative h-[200vh] w-full bg-[#040617] snap-start"
+      >
         <ScrollScene
           height="200vh"
           backgroundColor="#040617"
@@ -84,19 +42,22 @@ function Homepage() {
         />
       </section>
 
-      <section id="about" style={{ padding: '5rem 0' }}>
-        <div className="container">
-          <div className="about-content">
-            <div className="about-text">
-              <h2>About This Template</h2>
-              <p>
+      <section id="about" className="bg-gray-900 py-20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row gap-8 items-center">
+            <div className="flex-1 text-white">
+              <h2 className="text-[2.5rem] font-bold mb-6">
+                About This Template
+              </h2>
+              <p className="text-lg mb-4">
                 This template is built to help you create immersive 3D web experiences using modern web technologies.
               </p>
-              <p>
+              <p className="text-lg mb-4">
                 Featuring integration with Three.js, React Three Fiber, GSAP animations, and scroll-based interactions,
                 it provides everything you need to build standout 3D websites.
               </p>
-              <ul className="feature-grid">
+
+              <ul className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   { icon: <Code size={18} />, text: 'Three.js Integration' },
                   { icon: <Zap size={18} />, text: 'GSAP Animations' },
@@ -104,14 +65,17 @@ function Homepage() {
                   { icon: <Cpu size={18} />, text: 'Performance Focused' },
                   { icon: <Box size={18} />, text: 'Model Carousel' }
                 ].map(feature => (
-                  <li key={feature.text} className="feature-item">
-                    <span className="feature-icon">{feature.icon}</span>
-                    {feature.text}
+                  <li
+                    key={feature.text}
+                    className="flex items-center p-4 bg-white/5 rounded-lg backdrop-blur-lg transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 shadow-lg"
+                  >
+                    <span className="text-indigo-500 mr-2">{feature.icon}</span>
+                    <span>{feature.text}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="about-3d">
+            <div className="flex-1 h-[400px]">
               <AdvancedScene
                 backgroundColor="transparent"
                 ambientLightIntensity={0.4}
@@ -123,36 +87,56 @@ function Homepage() {
         </div>
       </section>
 
-      <section id="contact">
-        <div className="container">
-          <h2>Get In Touch</h2>
-          <div className="contact-content">
-            <div className="contact-form">
-              <form>
-                <div className="form-group">
-                  <label>Name</label>
-                  <div className="input-with-icon">
-                    <input type="text" placeholder="Your name" />
-                    <Mail size={18} className="input-icon" />
+      <section id="contact" className="bg-[#1E293B] py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-[2.5rem] font-bold text-white text-center mb-8">
+            Get In Touch
+          </h2>
+          <div className="flex flex-col md:flex-row gap-12">
+            <div className="flex-1">
+              <form className="space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-white mb-2">Name</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Your name"
+                      className="w-full p-3 bg-white/5 border border-white/10 rounded text-white transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
+                    />
+                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <div className="input-with-icon">
-                    <input type="email" placeholder="Your email" />
-                    <Mail size={18} className="input-icon" />
+
+                <div className="space-y-2">
+                  <label className="block text-white mb-2">Email</label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      placeholder="Your email"
+                      className="w-full p-3 bg-white/5 border border-white/10 rounded text-white transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
+                    />
+                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Message</label>
-                  <textarea rows={5} placeholder="Your message"></textarea>
+
+                <div className="space-y-2">
+                  <label className="block text-white mb-2">Message</label>
+                  <textarea
+                    rows={5}
+                    placeholder="Your message"
+                    className="w-full p-3 bg-white/5 border border-white/10 rounded text-white resize-y transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none font-inherit text-base"
+                  ></textarea>
                 </div>
-                <button className="submit-button">
+
+                <button
+                  className="flex items-center justify-center gap-2 w-full p-3 bg-indigo-500 text-white font-bold rounded hover:bg-indigo-600 transform transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30"
+                >
                   <Send size={18} /> Send Message
                 </button>
               </form>
             </div>
-            <div className="contact-3d">
+
+            <div className="flex-1 h-[400px]">
               <AdvancedScene
                 backgroundColor="transparent"
                 ambientLightIntensity={0.4}
@@ -187,10 +171,6 @@ export default function App() {
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/" element={<Homepage />} />
-            <Route path="/experience" element={<ExperiencePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/models" element={<ModelShowcasePage />} />
           </Routes>
         </Suspense>
       </MinimalLayout>
